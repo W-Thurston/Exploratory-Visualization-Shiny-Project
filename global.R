@@ -65,6 +65,7 @@ levels(matches$league) <- c('Bundesliga','Premier League','Ligue 1','Serie A','L
 matches = mutate(matches, hwin = ifelse(fthg>ftag,1,0), awin = ifelse(fthg<ftag,1,0))
 matches = select(matches, -c("odd_h","odd_d","odd_a","odd_over","odd_under","odd_bts","odd_bts_n"))
 
+
 # Win Rate ####
 hRec = group_by(matches, league, ht, hwin) %>%
   count(., awin)
@@ -90,18 +91,30 @@ b = select(filter(ungroup(wRec), type=='W'), -c('hwin','awin','n.y','n.x','type'
 a = left_join(b, a, by=c('league','ht')) 
 a = mutate(a, winrate=sum/total)
 
-events = left_join(events, a, by=c('league','event_team'='ht'))
-# summary(matches[matches$adv_stats==F,c('league','season')  ])
-# summary(matches[matches$adv_stats==T,c('league','season')  ])
+events = left_join(left_join(events, a, by=c('league','event_team'='ht')),a,by=c('league','opponent'='ht'))
+
+names(events) = c("id_odsp","id_event","sort_order","time","event_type","event_type2","side","event_team",  
+                  "opponent","player","player2","player_in","player_out","shot_place","shot_outcome","is_goal",      
+                  "location","bodypart","assist_method","situation","fast_break","league","season",
+                  "event_team_wins", "event_team_total_games", "event_team_winrate",
+                  "opponent_wins", "opponent_total_games", "opponent_winrate")
+
+
+###### Averaging across season 
+events = mutate(events, number_of_season = ifelse(events$event_team_total_games > 50, 2,1))
+
+events = filter(events, number_of_season > 1)
+
+#
 
 
 
-# Column <- group_by(matches, league) %>%
-#   count(., season) %>%
-#   spread(., season, n) %>%
-#   gvisColumnChart(.)
-# 
-# plot(Column)
+# events[,24:29] = events[,24:29]/events[,30]
+# events$event_team_winrate = events$event_team_wins/events$event_team_total_games
+# events$opponent_winrate = events$opponent_wins/events$opponent_total_games
+
+
+####
 
 # Exploring Data ####
 yearChoice = c(2015,2016,2017)
