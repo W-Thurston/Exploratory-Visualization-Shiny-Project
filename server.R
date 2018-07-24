@@ -244,10 +244,29 @@ shinyServer(function(input, output){
       arrange(desc(assists)) %>%
       head(25) %>%
       gvisBarChart(., xvar="player2", yvar="assists",
-                   options= list(title="Top Goalscorers", legend='none',width = "auto",
-                                 height = "800",hAxes="[{title:'Number of Goals',textPosition: 'out'}]",
+                   options= list(title="Top Assists", legend='none',width = "auto",
+                                 height = "800",hAxes="[{title:'Number of Assists',textPosition: 'out'}]",
                                  vAxes="[{title:'Players'}]"))
     
+  })
+  output$goalsToAssists <- renderGvis({
+    events[events$is_goal,] %>%
+      group_by(player) %>%
+      summarize(goals = n()) %>%
+      arrange(desc(goals)) %>%
+      head(25) %>%
+      left_join(., events[which(events$is_goal & !is.na(events$player2)), ] %>%
+                  group_by(player2) %>%
+                  summarize(assists = n()) %>%
+                  arrange(desc(assists)) %>%
+                  head(25), by=c('player'='player2')) %>%
+      replace_na(.,list(goals = 0, assists = 0)) %>%
+      gvisBubbleChart(.,idvar = 'player'  , xvar='assists',yvar='goals',
+                      options= list(title="Goals v. Assists",width = "auto",height = "700",
+                                    hAxes="[{title:'Assists',textPosition: 'out'}]",
+                                    vAxes="[{title:'Goals'}]",
+                                    bubble="{textStyle:{color: 'none',
+                                    fontSize:0}}"))
   })
   
 })

@@ -95,7 +95,8 @@ shinyUI(dashboardPage(
                              # The id lets us use input$tabset1 on the server to find the current tab
                              id = "tabset3", height = "250px", width = "300px",
                              tabPanel("Goals", htmlOutput("topGoalScorers")),
-                             tabPanel("Assists", htmlOutput("topAssists")))))))#tabItem
+                             tabPanel("Assists", htmlOutput("topAssists")),
+                             tabPanel("Goals / Assists", htmlOutput("goalsToAssists")))))))#tabItem
     )#tabItems
   )#dashboardBody
 ))#dashboardBodyPage)shiyUI

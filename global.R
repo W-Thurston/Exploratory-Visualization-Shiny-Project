@@ -6,8 +6,8 @@ library(ggplot2)
 library(formattable)
 
 # Read in data ####
-events <- fread('../football-events/events.csv')
-matches <- fread('../football-events/ginf.csv')
+events <- fread('./events.csv')
+matches <- fread('./ginf.csv')
 
 # Get the data we want into 1 dataframe ####
 events <- left_join(events, matches[,c('id_odsp','league','season')], by = "id_odsp")
