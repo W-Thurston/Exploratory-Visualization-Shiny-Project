@@ -5,25 +5,18 @@ library(googleVis)
 library(ggplot2)
 library(formattable)
 
-
-# write.csv(events, file = "../football-events/eventsCleaned.csv")
-# write.csv(matches, file = "../football-events/matchesCleaned.csv")
 # Read in data ####
 events <- fread('../football-events/events.csv')
-# str(events)
-#head(events)
-
 matches <- fread('../football-events/ginf.csv')
-# str(matches)
-#head(matches)
 
+# Get the data we want into 1 dataframe ####
 events <- left_join(events, matches[,c('id_odsp','league','season')], by = "id_odsp")
-
-# Changing data types of events table ####
 events = select(events, -text)
-
 events <- events[events$season>2014 & events$season < 2017,]
 matches <- matches[matches$season>2014 & matches$season < 2017,]
+
+
+# Changing data types of events table ####
 
 events$is_goal       <- as.logical(events$is_goal)
 events$bodypart      <- as.factor(events$bodypart)
@@ -39,8 +32,7 @@ events$shot_outcome  <- as.factor(events$shot_outcome)
 events$location      <- as.factor(events$location)
 events$situation     <- as.factor(events$situation)
 
-#head(events)
-
+# Event Columns to factors ####
 levels(events$league)        <- c('Bundesliga','Premier League','Ligue 1','Serie A','La Liga')
 levels(events$event_type)    <- c("Attempt","Corner",'Foul','Yellow card','Second yellow card','Red card','Substitution','Free kick won','Offside','Hand ball','Penalty conceded')
 levels(events$event_type2)   <- c("Key Pass","Failed through ball","Sending off","Own goal")
@@ -58,6 +50,7 @@ levels(events$bodypart)      <- c("right foot","left foot","head")
 levels(events$assist_method) <- c("None","Pass","Cross","Headed pass","Through ball")
 levels(events$situation)     <- c("Open play","Set piece","Corner","Free kick")
 
+# Match Columns to factors ####
 matches$league <- as.factor(matches$league)
 matches$season <- as.factor(matches$season)
 levels(matches$league) <- c('Bundesliga','Premier League','Ligue 1','Serie A','La Liga')
@@ -66,7 +59,7 @@ matches = mutate(matches, hwin = ifelse(fthg>ftag,1,0), awin = ifelse(fthg<ftag,
 matches = select(matches, -c("odd_h","odd_d","odd_a","odd_over","odd_under","odd_bts","odd_bts_n"))
 
 
-# Win Rate ####
+# Calculating Win Rate ####
 hRec = group_by(matches, league, ht, hwin) %>%
   count(., awin)
 aRec = group_by(matches, league, at, hwin) %>%
@@ -100,26 +93,16 @@ names(events) = c("id_odsp","id_event","sort_order","time","event_type","event_t
                   "opponent_wins", "opponent_total_games", "opponent_winrate")
 
 
-###### Averaging across season 
+# Taking only teams that were in both 2015 and 2016 ####
 events = mutate(events, number_of_season = ifelse(events$event_team_total_games > 50, 2,1))
-
 events = filter(events, number_of_season > 1)
-
-#
-
-
-
-# events[,24:29] = events[,24:29]/events[,30]
-# events$event_team_winrate = events$event_team_wins/events$event_team_total_games
-# events$opponent_winrate = events$opponent_wins/events$opponent_total_games
-
 
 ####
 
-# Exploring Data ####
-yearChoice = c(2015,2016,2017)
+# Defining Variables ####
+yearChoice = c(2015,2016)
 leagueChoice =  c(levels(events$league))
 leagueColor = c('red','blue','green','yellow','orange')
-situationChoice = c(levels(events$situation))
+situationChoice = c("Open play", "Set piece", "Corner")
 
 
